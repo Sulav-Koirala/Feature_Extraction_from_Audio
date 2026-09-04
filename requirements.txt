@@ -1,0 +1,13 @@
+librosa>=1.0.0            # audio analysis: MFCC, RMS, ZCR, onset/tempo (pulls numba, soxr, scipy)
+soundfile>=0.14.0         # WAV/FLAC/OGG/MP3 decoding (bundled libsndfile; no ffmpeg needed)
+scikit-learn>=1.9.0       # Random Forest, train/test split, metrics
+numpy>=2.1                # numerical arrays
+pandas>=3.0.0             # feature table (CSV)
+pyarrow>=25.0.0           # read the dataset's parquet files directly
+huggingface_hub>=1.30.0   # download the dataset parquet files
+matplotlib>=3.9.0         # confusion-matrix plots
+joblib>=1.4.0             # save/load trained models
+
+# Notebook (for notebooks/exploration.ipynb)
+jupyter>=1.0.0
+ipykernel>=6.29.0
