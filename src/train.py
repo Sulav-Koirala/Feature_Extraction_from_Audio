@@ -1,32 +1,11 @@
-"""Steps 6-8: train two Random Forest classifiers (speed + loudness), evaluate, save.
-
-Reports train accuracy, test accuracy, and 5-fold cross-validation accuracy so
-you can see there is no over/under-fitting:
-  * a small train-test gap  => not overfitting,
-  * stable, high CV scores  => not underfitting.
-
-Because the labels are derived from a subset of these same features (roadmap
-Step 5), accuracy is expected to be high -- that is honest, not leakage in the
-harmful sense; the point of the split + CV is to prove the rule generalizes.
-
-Saves confusion-matrix PNGs to outputs/confusion_matrices/ and joblib model
-bundles to models/.
-
-Run:
-    python -m src.train
-"""
-from __future__ import annotations
-
 import json
 from pathlib import Path
-
 import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import cross_val_score, train_test_split
-
 from . import config
 from .features import FEATURE_NAMES
 
@@ -43,7 +22,7 @@ def load_dataset(csv_path=None) -> pd.DataFrame:
 def _plot_confusion(cm, classes, title, out_path):
     import matplotlib
 
-    matplotlib.use("Agg")  # file output only, no display needed
+    matplotlib.use("Agg") 
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(4.5, 4.0))
@@ -69,8 +48,6 @@ def _plot_confusion(cm, classes, title, out_path):
 
 
 def _make_classifier() -> RandomForestClassifier:
-    # A robust, easy-to-explain default. min_samples_leaf>1 and averaging over
-    # many trees keep it from memorizing noise (guards against overfitting).
     return RandomForestClassifier(
         n_estimators=300,
         min_samples_leaf=2,
@@ -81,10 +58,8 @@ def _make_classifier() -> RandomForestClassifier:
 
 
 def train_one(name, X, y, classes, out_prefix):
-    """Train + evaluate one target. Returns ``(bundle_dict, metrics_dict)``."""
     print(f"\n=== Training {name} model ===")
 
-    # Stratified split: each class is proportionally represented (roadmap Step 6).
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=config.TEST_SIZE, random_state=config.SEED, stratify=y
     )
@@ -96,7 +71,6 @@ def train_one(name, X, y, classes, out_prefix):
     y_pred = clf.predict(X_test)
     test_acc = accuracy_score(y_test, y_pred)
 
-    # 5-fold CV (cap folds by the smallest class so it never errors on samples).
     min_class = int(pd.Series(y_train).value_counts().min())
     cv_folds = max(2, min(5, min_class))
     cv = cross_val_score(clf, X_train, y_train, cv=cv_folds)
@@ -114,7 +88,6 @@ def train_one(name, X, y, classes, out_prefix):
     _plot_confusion(cm, present, f"{name} - confusion matrix (test set)", cm_path)
     print(f"  saved confusion matrix -> {cm_path}")
 
-    # Top feature importances (nice to explain in a viva).
     importances = sorted(
         zip(FEATURE_NAMES, clf.feature_importances_), key=lambda t: t[1], reverse=True
     )

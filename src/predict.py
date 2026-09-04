@@ -1,21 +1,7 @@
-"""Steps 9-10: end-to-end CLI predictor.
-
-Given any audio file, this preprocesses it, extracts the SAME features used in
-training, and prints a full feature report plus the two predictions (with
-confidence). This is the tool a user actually runs.
-
-Usage:
-    python -m src.predict path/to/audio.wav
-    python -m src.predict                 # prompts for a file path
-"""
-from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import joblib
 import numpy as np
-
 from . import config
 from .audio_io import load_audio_file
 from .features import FEATURE_NAMES, extract_features
@@ -34,7 +20,6 @@ def load_model(path):
 
 
 def _predict_with_conf(bundle, x):
-    """Return (label, confidence in [0,1] or None) using the bundle's feature order."""
     model = bundle["model"]
     names = bundle.get("feature_names", FEATURE_NAMES)
     row = np.array([[x[n] for n in names]], dtype=np.float32)
@@ -44,8 +29,6 @@ def _predict_with_conf(bundle, x):
 
 
 def predict_from_file(audio_path) -> dict:
-    """Raw file -> preprocess -> features -> both predictions. Returns a result dict."""
-    # Load models first so a "train first" message appears before any audio work.
     speed_bundle = load_model(config.SPEED_MODEL_PATH)
     loud_bundle = load_model(config.LOUDNESS_MODEL_PATH)
 
