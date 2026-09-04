@@ -7,7 +7,3 @@ pyarrow>=25.0.0           # read the dataset's parquet files directly
 huggingface_hub>=1.30.0   # download the dataset parquet files
 matplotlib>=3.9.0         # confusion-matrix plots
 joblib>=1.4.0             # save/load trained models
-
-# Notebook (for notebooks/exploration.ipynb)
-jupyter>=1.0.0
-ipykernel>=6.29.0
