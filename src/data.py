@@ -15,7 +15,7 @@ def download_parquets(files: list[str] | None = None) -> list[str]:
     return paths
 
 
-def _extract_bytes(cell) -> bytes | None:
+def extract_bytes(cell) -> bytes | None:
     if cell is None:
         return None
     if isinstance(cell, dict):
@@ -39,7 +39,7 @@ def iter_clips(files: list[str] | None = None, limit: int | None = None) -> Iter
             for row_id, cell in zip(ids, audios):
                 if limit is not None and yielded >= limit:
                     return
-                raw = _extract_bytes(cell)
+                raw = extract_bytes(cell)
                 if not raw:
                     continue
                 try:

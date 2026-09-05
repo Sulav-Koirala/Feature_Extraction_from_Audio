@@ -23,11 +23,11 @@ runs from the command line, no web UI.
 
 .venv/bin/python -m src.train
 
-.venv/bin/python -m src.predict path/to/audio.wav
+.venv/bin/python -m src.predict
 ```
 
 `build_dataset` accepts `--limit N` to process only the first N clips (quick test).
-
+`predict` asks user for the audio file via input.
 
 ## Layout
 

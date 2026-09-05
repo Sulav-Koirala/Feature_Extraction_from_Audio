@@ -13,7 +13,7 @@ FEATURE_NAMES: list[str] = (
 )
 
 
-def _estimate_tempo(y: np.ndarray, sr: int) -> float:
+def estimate_tempo(y: np.ndarray, sr: int) -> float:
     try:
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
         return float(np.atleast_1d(tempo)[0])
@@ -21,7 +21,7 @@ def _estimate_tempo(y: np.ndarray, sr: int) -> float:
         return 0.0
 
 
-def extract_features(y: np.ndarray, sr: int = SAMPLE_RATE) -> "OrderedDict[str, float]":
+def extract_features(y: np.ndarray, sr: int = SAMPLE_RATE) -> OrderedDict[str, float]:
     feats: OrderedDict[str, float] = OrderedDict()
 
     duration = float(len(y)) / float(sr) if sr else 0.0
@@ -31,7 +31,7 @@ def extract_features(y: np.ndarray, sr: int = SAMPLE_RATE) -> "OrderedDict[str, 
             feats[name] = 0.0
         return feats
 
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=N_MFCC)  # shape (N_MFCC, frames)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=N_MFCC)
     mfcc_mean = mfcc.mean(axis=1)
     mfcc_std = mfcc.std(axis=1)
     for i in range(N_MFCC):
@@ -39,7 +39,7 @@ def extract_features(y: np.ndarray, sr: int = SAMPLE_RATE) -> "OrderedDict[str, 
     for i in range(N_MFCC):
         feats[f"mfcc_{i + 1}_std"] = float(mfcc_std[i])
 
-    rms = librosa.feature.rms(y=y)[0]  # shape (frames,)
+    rms = librosa.feature.rms(y=y)[0] 
     rms_mean = float(rms.mean())
     feats["rms_mean"] = rms_mean
     feats["rms_std"] = float(rms.std())
@@ -56,7 +56,7 @@ def extract_features(y: np.ndarray, sr: int = SAMPLE_RATE) -> "OrderedDict[str, 
 
     onsets = librosa.onset.onset_detect(y=y, sr=sr, units="time")
     feats["onset_rate"] = float(len(onsets) / duration) if duration > 0 else 0.0
-    feats["tempo"] = _estimate_tempo(y, sr)
+    feats["tempo"] = estimate_tempo(y, sr)
     feats["duration"] = duration
 
     return feats

@@ -1,5 +1,4 @@
 import numpy as np
-
 from .config import LOUDNESS_CLASSES, LOWER_PERCENTILE, SPEED_CLASSES, UPPER_PERCENTILE
 
 
@@ -10,7 +9,7 @@ def percentile_thresholds(values) -> tuple[float, float]:
     return lo, hi
 
 
-def _bucket(value: float, lo: float, hi: float, classes: list[str]) -> str:
+def bucket(value: float, lo: float, hi: float, classes: list[str]) -> str:
     if value < lo:
         return classes[0]
     if value < hi:
@@ -20,12 +19,12 @@ def _bucket(value: float, lo: float, hi: float, classes: list[str]) -> str:
 
 def assign_loudness(value: float, thresholds: tuple[float, float]) -> str:
     lo, hi = thresholds
-    return _bucket(value, lo, hi, LOUDNESS_CLASSES)
+    return bucket(value, lo, hi, LOUDNESS_CLASSES)
 
 
 def assign_speed(value: float, thresholds: tuple[float, float]) -> str:
     lo, hi = thresholds
-    return _bucket(value, lo, hi, SPEED_CLASSES)
+    return bucket(value, lo, hi, SPEED_CLASSES)
 
 
 def compute_speed_score(onset_rate) -> np.ndarray:

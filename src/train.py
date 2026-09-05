@@ -19,35 +19,23 @@ def load_dataset(csv_path=None) -> pd.DataFrame:
     return pd.read_csv(csv_path)
 
 
-def _plot_confusion(cm, classes, title, out_path):
+def plot_confusion(cm, classes, title, out_path):
     import matplotlib
-
-    matplotlib.use("Agg") 
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
-    fig, ax = plt.subplots(figsize=(4.5, 4.0))
-    im = ax.imshow(cm, cmap="Blues")
-    ax.set_xticks(range(len(classes)))
-    ax.set_yticks(range(len(classes)))
-    ax.set_xticklabels(classes)
-    ax.set_yticklabels(classes)
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("True")
-    ax.set_title(title)
-    thresh = cm.max() / 2.0 if cm.max() else 0.5
-    for i in range(cm.shape[0]):
-        for j in range(cm.shape[1]):
-            ax.text(
-                j, i, str(cm[i, j]), ha="center", va="center",
-                color="white" if cm[i, j] > thresh else "black",
-            )
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=120)
-    plt.close(fig)
+    plt.figure(figsize=(4.5, 4))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=classes, yticklabels=classes)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=120)
+    plt.close()
 
 
-def _make_classifier() -> RandomForestClassifier:
+def make_classifier() -> RandomForestClassifier:
     return RandomForestClassifier(
         n_estimators=300,
         min_samples_leaf=2,
@@ -58,13 +46,11 @@ def _make_classifier() -> RandomForestClassifier:
 
 
 def train_one(name, X, y, classes, out_prefix):
-    print(f"\n=== Training {name} model ===")
+    print(f"\nTraining {name} model: ")
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=config.TEST_SIZE, random_state=config.SEED, stratify=y
-    )
+    X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=config.TEST_SIZE, random_state=config.SEED, stratify=y)
 
-    clf = _make_classifier()
+    clf = make_classifier()
     clf.fit(X_train, y_train)
 
     train_acc = accuracy_score(y_train, clf.predict(X_train))
@@ -75,33 +61,31 @@ def train_one(name, X, y, classes, out_prefix):
     cv_folds = max(2, min(5, min_class))
     cv = cross_val_score(clf, X_train, y_train, cv=cv_folds)
 
-    print(f"  train accuracy : {train_acc:.3f}")
-    print(f"  test  accuracy : {test_acc:.3f}")
-    print(f"  {cv_folds}-fold CV     : {cv.mean():.3f} +/- {cv.std():.3f}")
-    print(f"  train-test gap : {train_acc - test_acc:.3f}  (small => no overfit)")
+    print(f"train accuracy : {train_acc:.3f}")
+    print(f"test  accuracy : {test_acc:.3f}")
+    print(f"{cv_folds}-fold CV : {cv.mean():.3f} +/- {cv.std():.3f}")
+    print(f"train-test gap : {train_acc - test_acc:.3f}  (small gap implies no overfit)")
     print("\n" + classification_report(y_test, y_pred, zero_division=0))
 
-    present = [c for c in classes if c in set(np.unique(y))]
-    cm = confusion_matrix(y_test, y_pred, labels=present)
+    labels = [c for c in classes if c in set(np.unique(y))]
+    cm = confusion_matrix(y_test, y_pred, labels=labels)
     config.CONFUSION_DIR.mkdir(parents=True, exist_ok=True)
     cm_path = config.CONFUSION_DIR / f"{out_prefix}_confusion.png"
-    _plot_confusion(cm, present, f"{name} - confusion matrix (test set)", cm_path)
-    print(f"  saved confusion matrix -> {cm_path}")
+    plot_confusion(cm, labels, f"{name} - confusion matrix (test set)", cm_path)
+    print(f"saved confusion matrix -> {cm_path}")
 
-    importances = sorted(
-        zip(FEATURE_NAMES, clf.feature_importances_), key=lambda t: t[1], reverse=True
-    )
+    importances = sorted(zip(FEATURE_NAMES, clf.feature_importances_), key=lambda t: t[1], reverse=True)
     top = ", ".join(f"{n}({v:.2f})" for n, v in importances[:5])
-    print(f"  top features   : {top}")
+    print(f"top features : {top}")
 
-    bundle = {"model": clf, "feature_names": FEATURE_NAMES, "classes": present}
+    bundle = {"model": clf, "feature_names": FEATURE_NAMES, "classes": labels}
     metrics = {
         "train_accuracy": float(train_acc),
         "test_accuracy": float(test_acc),
         "cv_folds": cv_folds,
         "cv_mean": float(cv.mean()),
         "cv_std": float(cv.std()),
-        "classes": present,
+        "classes": labels,
         "confusion_matrix": cm.tolist(),
         "top_features": [[n, float(v)] for n, v in importances[:10]],
     }
@@ -126,13 +110,13 @@ def main(csv_path=None):
         "Speed", X, df["speed_label"].to_numpy(), config.SPEED_CLASSES, "speed"
     )
     joblib.dump(speed_bundle, config.SPEED_MODEL_PATH)
-    print(f"  saved model -> {config.SPEED_MODEL_PATH}")
+    print(f"saved model -> {config.SPEED_MODEL_PATH}")
 
     loud_bundle, loud_metrics = train_one(
         "Loudness", X, df["loudness_label"].to_numpy(), config.LOUDNESS_CLASSES, "loudness"
     )
     joblib.dump(loud_bundle, config.LOUDNESS_MODEL_PATH)
-    print(f"  saved model -> {config.LOUDNESS_MODEL_PATH}")
+    print(f"saved model -> {config.LOUDNESS_MODEL_PATH}")
 
     all_metrics["speed_model"] = speed_metrics
     all_metrics["loudness_model"] = loud_metrics
