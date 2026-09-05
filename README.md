@@ -1,4 +1,4 @@
-# Audio Feature Extraction → Speed & Loudness Prediction
+# Audio Feature Extraction: Speed & Loudness Prediction
 
 Given an audio file, this extracts acoustic features (MFCC, RMS energy/dB, ZCR,
 onset-rate/tempo, spectral centroid) and predicts two things:
@@ -15,8 +15,6 @@ runs from the command line, no web UI.
 ```bash
 .venv/bin/python -m pip install -r requirements.txt
 ```
-
-(Uses the existing `.venv`. First install pulls librosa/numba/scipy, a few minutes.)
 
 ## Run the pipeline
 
