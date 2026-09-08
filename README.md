@@ -69,3 +69,5 @@ outputs/            features.csv, metrics.json, confusion matrices, signal_stage
   design; `src.train` prints train vs. test vs. cross-val accuracy so you can
   confirm the small gap = no overfitting. Labels are heuristic, not human-annotated.
 - `visualize.py` is a diagnostic aid onlu, it doesn't feed into `build_dataset` or `train`, it just renders what `preprocess.py` does to a signal at each step.
+
+**NOTE: models and outputs are empty and kept as .gitkeep only to show the file structure, the .png images, .csv and .json files and the .pkl files are not commited. They can be created by running the code in ordered as given above.**
