@@ -96,6 +96,13 @@ def main() -> int:
         print(f"Failed to analyze '{audio_path}': {exc}")
         return 1
     print_report(audio_path, result)
+    try:
+        from .visualize import make_stage_plots
+
+        out_dir = make_stage_plots(audio_path)
+        print(f"Saved signal graphs -> {out_dir}")
+    except Exception as exc:
+        print(f"(Could not generate signal graphs: {exc})")
     return 0
 
 

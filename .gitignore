@@ -4,6 +4,7 @@ __pycache__/
 models/*.pkl
 
 outputs/confusion_matrices/
+outputs/signal_stages/
 outputs/*.csv
 outputs/*.json
 
